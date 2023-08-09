@@ -8,7 +8,7 @@
 
 ## [Traffic Management](traffic-mgmt/README.md)
 
-## [Ingress and Egress Control]
+## Ingress and Egress Control
 
 ## Global Load Balancer
 
