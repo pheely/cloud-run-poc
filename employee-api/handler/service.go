@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"io"
 	"encoding/base32"
 	"encoding/json"
 	"net/http"
@@ -70,6 +71,11 @@ func addId(t stores.Employee) employee {
 		Age: 			t.Age,
 	}
 	return tU
+}
+
+func (s *Service) Help(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, "Employee API v4 \n")
 }
 
 func (s *Service) List(w http.ResponseWriter, r *http.Request) {

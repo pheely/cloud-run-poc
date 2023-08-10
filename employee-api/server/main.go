@@ -94,6 +94,7 @@ func main() {
 	api.Path("/employee/{id}").Methods(http.MethodGet).HandlerFunc(s.Get)
 	api.Path("/employee/{id}").Methods(http.MethodDelete).HandlerFunc(s.Delete)
 	api.Path("/employee/{id}").Methods(http.MethodPatch, http.MethodPut).HandlerFunc(s.Update)
+	api.Path("/help").Methods(http.MethodGet, http.MethodGet).HandlerFunc(s.Help)
 	api.Path("/tokenize").Methods(http.MethodPost).HandlerFunc(s.Tokenize)
 	api.Path("/detokenize").Methods(http.MethodPost).HandlerFunc(s.Detokenize)
 
