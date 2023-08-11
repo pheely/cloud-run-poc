@@ -1,18 +1,22 @@
 # Cloud Run POCs
 
-## [Restful API](employee-api/README.md)
+## [1. Restful API](employee-api/README.md)
 
-## [Service-to-Service Authentication](employee-client/README.md)
+## [2. Service-to-Service Authentication](employee-client/README.md)
 
-## [Service-to-Service Communication (Async)](async/README.md)
+## [3. Service-to-Service Communication (Async)](async/README.md)
 
-## [Event Triggering](event-trigger/README.md)
+## [4. Event Triggering](event-trigger/README.md)
 
-## [Traffic Management](traffic-mgmt/README.md)
+## [5. Accessing Resources on a VPC](redis/README.md)
 
-## Ingress and Egress Control
+## [6. Traffic Management](traffic-mgmt/README.md)
 
-## Global Load Balancer
+## [7. Global Load Balancer](glb/README.md)
+
+## 8. Ingress Control
+
+
 
 <style>
     h1 {

@@ -93,8 +93,7 @@ gcloud builds submit --tag $REPOSITORY/employee
 
 1. Deploy
 	```bash
-	gcloud run deploy employee-api \
-	--image $REPOSITORY/employee \
+	gcloud run deploy employee-api --image $REPOSITORY/employee \
 	--allow-unauthenticated
 	```
 2. Check the service is deployed successfully
@@ -170,22 +169,14 @@ $EMPLOYEE_API/api/help
 
 ### Manual cleanup
 
-1. Delete the Cloud Run service
-	```bash
-	gcloud run services delete employee-api
-	```
-2. Remove the Cloud SQL instance
-	```bash
-	gcloud sql instances delete sql-db
-	```
-3. Delete docker images (packages) in the Artifact Registry repository
-	```bash
-	# list all packages in the repo
-	gcloud artifacts packages list --repository=cloud-run-try --location=us-central1
+```bash
+gcloud run services delete employee-api
 
-	# delete the package
-	gcloud artifacts packages delete employee --repository=cloud-run-try --location=us-central1
-	```
+gcloud sql instances delete sql-db	
+
+gcloud artifacts packages delete employee --repository=cloud-run-try \
+--location=us-central1
+```
 
 ### Cleanup with Terraform
 

@@ -109,10 +109,16 @@ Employee API v1
 
 ```bash
 gcloud run services delete employee-api
+
 gcloud run services delete client
+
 gcloud iam service-accounts delete emp-api-client@ibcwe-event-layer-f3ccf6d9.iam.gserviceaccount.com
-gcloud artifacts packages delete --repository=cloud-run-try --location=us-central1 employee
-gcloud artifacts packages delete --repository=cloud-run-try --location=us-central1 client
+
+gcloud artifacts packages delete employee --repository=cloud-run-try \
+--location=us-central1 
+
+gcloud artifacts packages delete client --repository=cloud-run-try \
+--location=us-central1 
 ```
 
 <style>

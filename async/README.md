@@ -120,15 +120,20 @@ Go to Google Cloud Console, and check the logs the `consumer-service`, you shoul
 
 ```bash
 gcloud run services delete producer-service
-gcloud run services delete consumer-service
-gcloud iam service-accounts delete async-cloud-run@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
-gcloud pubsub subscriptions delete consumer-service-sub
-gcloud pubsub topics delete $TOPIC
-gcloud artifacts packages delete --repository=cloud-run-try \
---location=us-central1 producer
 
-gcloud artifacts packages delete --repository=cloud-run-try \
---location=us-central1 consumer
+gcloud run services delete consumer-service
+
+gcloud iam service-accounts delete async-cloud-run@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
+
+gcloud pubsub subscriptions delete consumer-service-sub
+
+gcloud pubsub topics delete $TOPIC
+
+gcloud artifacts packages delete producer --repository=cloud-run-try \
+--location=us-central1 
+
+gcloud artifacts packages delete consumer --repository=cloud-run-try \
+--location=us-central1 
 ```
 <style>
     h1 {

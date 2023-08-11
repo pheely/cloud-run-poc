@@ -87,7 +87,6 @@ gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
 
 ```bash
 SERVICE_URL=$(gcloud run services describe event \
---platform managed \
 --format "value(status.url)")
 
 gcloud pubsub subscriptions create file-processor-sub \
@@ -119,12 +118,19 @@ Verify `test_file` is moved to gs://$GOOGLE_CLOUD_PROJECT-output bucket.
 
 ```bash
 gsutil rb gs://$GOOGLE_CLOUD_PROJECT-input
+
 gsutil rb gs://$GOOGLE_CLOUD_PROJECT-output
+
 gcloud run services delete event
+
 gcloud iam service-accounts delete pubsub-cloud-run-invoker@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
+
 gcloud pubsub topics delete new-doc
+
 gcloud pubsub subscriptions delete file-processor-sub
-gcloud artifacts docker images delete  $REPOSITORY/event
+
+gcloud artifacts packages delete event --repository=cloud-run-try \
+--location=us-central1 
 ```
 
 <style>
