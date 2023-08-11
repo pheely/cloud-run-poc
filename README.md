@@ -2,11 +2,11 @@
 
 ## [Restful API](employee-api/README.md)
 
-## [Service-to-Service Authentication (Sync)](employee-client/README.md)
+## [Service-to-Service Authentication](employee-client/README.md)
 
-## [Event Triggering](pdf-converter/README.md)
+## [Service-to-Service Communication (Async)](async/README.md)
 
-## [Service-to-Service Communication (Async)](store-order/README.md)
+## [Event Triggering](event-trigger/README.md)
 
 ## [Traffic Management](traffic-mgmt/README.md)
 

@@ -16,12 +16,17 @@ And version 2 of the application will be returned
 Employee API v2
 ```
 
+## Environment Variables
+
+```bash
+GOOGLE_CLOUD_PROJECT=ibcwe-event-layer-f3ccf6d9
+REPOSITORY=us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/cloud-run-try
+```
+
 ## Deploy the Service of Version 1
 
 ```bash
-gcloud run deploy employee-api \
---image us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee:v1 \
---tag ver1 
+gcloud run deploy employee-api --image $REPOSITORY/employee:v1 --tag ver1 
 ```
 
 Each new Cloud Run service revision can be assigned a tag. Doing this will create a revision specific URL which is unknown to the client. This can be useful to handle the traffic profile across multiple revisions. 
@@ -59,9 +64,8 @@ Employee API v1
 We will deploy the version 2 of the service without assigning real traffic. We want to test it in production first. This can be done using the `--no-traffic` flag.
 
 ```bash
-gcloud run deploy employee-api \
---image us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee:v2 \
---tag ver2 --no-traffic
+gcloud run deploy employee-api --image $REPOSITORY/employee:v2 --tag ver2 \
+--no-traffic
 ```
 
 The revision specific URL should be https://ver2---employee-api-oy6beuif2a-uc.a.run.app.
@@ -132,12 +136,10 @@ done
 Let's deploy two more revisions of the service without routing traffic to them.
 
 ```bash
-gcloud run deploy employee-api \
---image us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee:v3 \
+gcloud run deploy employee-api --image $REPOSITORY/employee:v3 \
 --tag ver3 --no-traffic
 
-gcloud run deploy employee-api \
---image us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee:v4 \
+gcloud run deploy employee-api --image $REPOSITORY/employee:v4 \
 --tag ver4 --no-traffic
 ```
 

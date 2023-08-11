@@ -37,6 +37,12 @@ docker-compose up
 	--repository-format docker \
 	cloud-run-try
 	```
+## Environment Variables
+
+```bash
+GOOGLE_CLOUD_PROJECT=ibcwe-event-layer-f3ccf6d9
+REPOSITORY=us-central1-docker.pkg.dev/$GOOGLE_CLOUD_PROJECT/cloud-run-try
+```
 
 ## Build
 
@@ -44,8 +50,7 @@ docker-compose up
 
 1. Build the docker image.
 	```bash
-	docker build -t \
-	us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee .
+	docker build -t $REPOSITORY/employee .
 	```
 2. Set up credentials to access the repo
 	```bash
@@ -53,8 +58,7 @@ docker-compose up
 	```
 3. Push the image
 	```bash
-	docker push \
-	us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee
+	docker push $REPOSITORY/employee
 	```
 4. Verify the image is built and pushed successfully
 	```bash
@@ -64,7 +68,7 @@ docker-compose up
 ### Cloud Build
 
 ```bash
-gcloud builds submit --tag us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee2
+gcloud builds submit --tag $REPOSITORY/employee
 ```
 
 ## Deployment
@@ -90,7 +94,7 @@ gcloud builds submit --tag us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9
 1. Deploy
 	```bash
 	gcloud run deploy employee-api \
-	--image us-central1-docker.pkg.dev/ibcwe-event-layer-f3ccf6d9/cloud-run-try/employee \
+	--image $REPOSITORY/employee \
 	--allow-unauthenticated
 	```
 2. Check the service is deployed successfully
@@ -154,8 +158,12 @@ $ gcloud run services list
 ### Hit the endpoint
 
 ```bash
+
+EMPLOYEE_API=$(gcloud run services describe employee-api \
+--format "value(status.url)")
+
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-https://employee-api-oy6beuif2a-uc.a.run.app/api/employee
+$EMPLOYEE_API/api/help
 ```
 
 ## Cleanup
@@ -188,3 +196,35 @@ https://employee-api-oy6beuif2a-uc.a.run.app/api/employee
 	```
 
 2. Delete docker images (packages) in the Artifact Registry repository: same as above
+<style>
+    h1 {
+        color: DarkRed;
+        text-align: center;
+    }
+    h2 {
+        color: DarkBlue;
+    }
+    h3 {
+        color: DarkGreen;
+    }
+    h4 {
+        color: DarkMagenta;
+    }
+    strong {
+        color: Maroon;
+    }
+    em {
+        color: Maroon;
+    }
+    img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto
+    }
+    code {
+        color: SlateBlue;
+    }
+    mark {
+        background-color:GoldenRod;
+    }
+</style>

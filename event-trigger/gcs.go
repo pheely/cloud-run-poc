@@ -70,7 +70,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	if os.Getenv("PDF_BUCKET") == "" {
-		log.Fatal("Need env var PDF_BUCKET: target GCS bucket where generated PDF will be written")
+	if os.Getenv("OUT_BUCKET") == "" {
+		log.Fatal("Need env var OUT_BUCKET: target bucket")
 	}
 }
