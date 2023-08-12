@@ -1,7 +1,5 @@
 # Using a HTTP Global Loadbalancer 
 
-## [Restful API](employee-api/README.md)
-
 ## Use Case
 
 Set up and use an HTTP global load balancer with Employee API. 

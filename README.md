@@ -14,7 +14,7 @@
 
 ## [7. Global Load Balancer](glb/README.md)
 
-## 8. Ingress Control
+## [8. Ingress Control](ingress/README.md)
 
 
 
