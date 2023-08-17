@@ -94,7 +94,8 @@ gcloud builds submit --tag $REPOSITORY/employee
 1. Deploy
 	```bash
 	gcloud run deploy employee-api --image $REPOSITORY/employee \
-	--allow-unauthenticated
+	--add-cloudsql-instances ibcwe-event-layer-f3ccf6d9:us-central1:sql-db \
+	--set-env-vars DB="mysql://root@unix(/cloudsql/ibcwe-event-layer-f3ccf6d9:us-central1:sql-db)/hr"
 	```
 2. Check the service is deployed successfully
 	```bash
