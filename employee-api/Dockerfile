@@ -5,10 +5,10 @@ COPY go.* ./
 RUN go mod download
  
 COPY . .
-RUN go build -o /go/bin/server github.com/pheely/employee-api/server
+RUN go build -o /go/bin/main 
 
 FROM gcr.io/distroless/base-debian10:nonroot AS run
 
-COPY --from=build-go /go/bin/server /app/server
+COPY --from=build-go /go/bin/main /app/main
  
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app/main"]

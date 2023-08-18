@@ -4,11 +4,21 @@
 
 - This POC is to explore how Google Cloud Run can be used as a solution for some simple microservices. 
 
-- Terraform is used to deploy all the required resources to support the idea of infrastructure as code.
-
-- The application exposes an `employee` API endpoint which provides CRUD operations on the Employee resource.
+- Use Terraform to deploy all the required resources to support the idea of infrastructure as code.
 
 ![img](../img/poc.png)
+
+## Architecture
+
+![img](../img/api.png)
+
+- The application exposes an employee API endpoint which provides CRUD operations on the Employee resource.
+- CloudSQL MySQL is used as the data store
+- The application code uses the [Cloud SQL connectors](https://cloud.google.com/sql/docs/mysql/connect-connectors) library to connect to MySQL (other options: Unix Socket, TCP Socket)
+- The database password is stored in Secret Manager
+- The application is deployed as a Cloud Run service using a service account which has two roles:
+	- roles/cloudsql.client
+	- roles/secretmanager.secretAccessor
 
 ## Local testing
 
@@ -89,14 +99,26 @@ gcloud builds submit --tag $REPOSITORY/employee
 	gcloud sql databases create hr --instance sql-db
 	```
 
+#### Secret
+
+Create a secret named "DB_PASS":
+```bash
+echo -n "changeit" | gcloud secrets create DB_PASS --replication-policy automatic --data-file=-
+```
+To access the contents of the version 1 of the secret:
+```bash
+gcloud secrets versions access 1 --secret DB_PASS
+```
+
 #### Cloud Run service
 
 1. Deploy
 	```bash
-	gcloud run services update employee-api --image $REPOSITORY/employee \
+	gcloud run deploy employee-api --image $REPOSITORY/employee \
+	--service-account=gyre-dataflow@ibcwe-event-layer-f3ccf6d9.iam.gserviceaccount.com \
 	--add-cloudsql-instances ibcwe-event-layer-f3ccf6d9:us-central1:sql-db \
 	--set-env-vars DB_USER=root \
-	--set-env-vars DB_PASS=changeit \
+	--set-secrets DB_PASS=DB_PASS:1 \
 	--set-env-vars DB_NAME=hr \
 	--set-env-vars DB_PRIVATE_IP= \
 	--set-env-vars INSTANCE_CONNECTION_NAME=ibcwe-event-layer-f3ccf6d9:us-central1:sql-db
