@@ -1,20 +1,14 @@
 package main
 
 import (
-	"context"
 	"io"
-	"encoding/base32"
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
-	"github.com/gorilla/sessions"
-	"github.com/rs/zerolog/log"
 )
 
-func JsonHeader(next http.Handler) http.Handler {
+func jsonHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("content-type", "application/json")
 		next.ServeHTTP(w, r)
@@ -22,7 +16,7 @@ func JsonHeader(next http.Handler) http.Handler {
 }
 
 type Service struct {
-	DataSource ConnectionPool
+	connection DataSource
 }
 
 type employee struct {
@@ -41,27 +35,27 @@ func (s *Service) Help(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	list, err := s.DataSource.List()
+	list, err := s.connection.List()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	result := []employee{}
 	for _, t := range list {
-		result = append(result, addId(t))
+		result = append(result, convertToEmployeeJson(t))
 	}
 	json.NewEncoder(w).Encode(result)
 }
 
 func (s *Service) Clear(w http.ResponseWriter, r *http.Request) {
-	s.DataSource.Clear()
+	s.connection.Clear()
 	s.List(w, r)
 }
 
 func (s *Service) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	err := s.Store.Delete(id)
+	err := s.connection.Delete(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,14 +68,14 @@ func (s *Service) Update(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 
-	var newT stores.Employee
+	var newT Employee
 	err := decoder.Decode(&newT)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	res, err := s.Store.Update(id, &newT)
+	res, err := s.connection.Update(id, &newT)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -91,18 +85,18 @@ func (s *Service) Update(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(addId(*res))
+	json.NewEncoder(w).Encode(convertToEmployeeJson(*res))
 }
 
 func (s *Service) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	t, err := s.Store.Get(vars["id"])
+	t, err := s.connection.Get(vars["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if t != nil {
-		json.NewEncoder(w).Encode(addId(*t))
+		json.NewEncoder(w).Encode(convertToEmployeeJson(*t))
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
@@ -110,16 +104,29 @@ func (s *Service) Get(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var t stores.Employee
+	var t Employee
 	err := decoder.Decode(&t)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = s.Store.Create(&t)
+	err = s.connection.Create(&t)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(addId(t))
+	json.NewEncoder(w).Encode(convertToEmployeeJson(t))
+}
+
+func convertToEmployeeJson(t Employee) employee {
+	jsonT := employee {
+		Id: t.ID,
+		First_Name: t.First_Name,
+		Last_Name: t.Last_Name,
+		Department: t.Department,
+		Salary: t.Salary,
+		Age: t.Age,
+	}
+
+	return jsonT
 }

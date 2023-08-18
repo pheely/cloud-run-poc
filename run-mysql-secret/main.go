@@ -1,13 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/yfuruyama/crzerolog"
@@ -23,17 +20,14 @@ type Employee struct {
 	Age       int
 }
 
-type Store interface {
-	Connect() error
-	Create(employee *Employee) error
-	Clear() error
-	Get(id string) (*Employee, error)
-	Update(id string, employee *Employee) (*Employee, error)
-	Delete(id string) error
-	List() ([]Employee, error)
+type ConnectionParams struct {
+	DBUser                 string
+	DBPwd                  string
+	DBName                 string
+	PrivateIP              string
 }
 
-var dbPool ConnectionPool
+var params ConnectionParams
 var port string
 
 func init() {
@@ -48,23 +42,21 @@ func init() {
 	}
 
 	if dbUser == "" {
-		log.Fatal("Please set DB_USER.")
+		log.Fatal().Msg("Please set DB_USER.")
 	}
 	if dbPassword == "" {
-		log.Fatal("Please set DB_PASS")
+		log.Fatal().Msg("Please set DB_PASS")
 	}
 	if dbName == "" {
-		log.Fatal("Please set DB_NAME")
+		log.Fatal().Msg("Please set DB_NAME")
 	}
 	
-	params := Parameters {
+	params = ConnectionParams {
 		DBUser: dbUser,
 		DBPwd: dbPassword,
 		DBName: dbName,
 		PrivateIP: privateIp,
 	}
-	
-	dbPool = CreateConnectionPool(params)
 }
 
 func main() {
@@ -74,10 +66,10 @@ func main() {
 	r := mux.NewRouter()
 	r.Use(middleware)
 
-	s := handler.Service{SessionStore: newSessionStore()}
+	s := Service{connection: createDataSource(params)}
 
 	api := r.PathPrefix("/api").Subrouter()
-	api.Use(handler.JsonHeader)
+	api.Use(jsonHeader)
 	api.Methods(http.MethodOptions).HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)

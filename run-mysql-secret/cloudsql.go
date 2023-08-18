@@ -1,38 +1,28 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"log"
-	"net"
-	"os"
 	"strconv"
 	"time"
 
-	"cloud.google.com/go/cloudsqlconn"
-	"github.com/go-sql-driver/mysql"
+	// "cloud.google.com/go/cloudsqlconn"
+	// "github.com/go-sql-driver/mysql"
 )
 
-type ConnectionPool struct {
-	Parameters ConnectionInfo
+type DataSource struct {
+	Parameters ConnectionParams
 	DB *sql.DB
 }
 
-type ConnectionInfo struct {
-	DBUser                 string
-	DBPwd                  string
-	DBName                 string
-	// InstanceConnectionName string
-	PrivateIP              string
+func createDataSource(params ConnectionParams) DataSource {
+	ds := DataSource{params, nil}
+	ds.Connect()
+	
+	return ds
 }
 
-func CreateConnectionPool(params ConnectionInfo) *ConnectionPool {
-	p := ConnectionPool{params, nil}
-	return &p
-}
-
-func (pool *ConnectionPool) Connect() error {
+func (ds *DataSource) Connect() error {
 	// d, err := cloudsqlconn.NewDialer(context.Background())
 	// if err != nil {
 	// 	return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
@@ -47,7 +37,7 @@ func (pool *ConnectionPool) Connect() error {
 	// 	})
 
 	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s?parseTime=true",
-		pool.Parameters.DBUser, pool.Parameters.DBPwd, pool.Parameters.DBName)
+		ds.Parameters.DBUser, ds.Parameters.DBPwd, ds.Parameters.DBName)
 
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
@@ -63,12 +53,12 @@ func (pool *ConnectionPool) Connect() error {
 		return fmt.Errorf("sql.Ping: %w", err)
 	}
 
-	pool.DB = dbPool
+	ds.DB = dbPool
 	return nil
 }
 
-func (pool ConnectionPool) Create(em *Employee) error {
-	stmt, err := pool.DB.Prepare(`INSERT INTO employees(first_name, last_name, department, salary, age) VALUES (
+func (ds DataSource) Create(em *Employee) error {
+	stmt, err := ds.DB.Prepare(`INSERT INTO employees(first_name, last_name, department, salary, age) VALUES (
 		?,
 		?, 
 		?,
@@ -90,8 +80,8 @@ func (pool ConnectionPool) Create(em *Employee) error {
 	return nil
 }
 
-func (pool ConnectionPool) Delete(id string) error {
-	stmt, err := pool.DB.Prepare("DELETE FROM employees WHERE id=?")
+func (ds DataSource) Delete(id string) error {
+	stmt, err := ds.DB.Prepare("DELETE FROM employees WHERE id=?")
 	if err != nil {
 		return err
 	}
@@ -102,9 +92,9 @@ func (pool ConnectionPool) Delete(id string) error {
 	return nil
 }
 
-func (pool ConnectionPool) Update(id string, newT *Employee) (*Employee, error) {
+func (ds DataSource) Update(id string, newT *Employee) (*Employee, error) {
 
-	t, err := s.Get(id)
+	t, err := ds.Get(id)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +115,7 @@ func (pool ConnectionPool) Update(id string, newT *Employee) (*Employee, error) 
 			t.Age = newT.Age
 		}
 
-		stmt, err := pool.DB.Prepare(`UPDATE employees SET 
+		stmt, err := ds.DB.Prepare(`UPDATE employees SET 
 			first_name = ?, 
 			last_name = ?, 
 			department = ?, 
@@ -146,8 +136,8 @@ func (pool ConnectionPool) Update(id string, newT *Employee) (*Employee, error) 
 	return nil, nil
 }
 
-func (pool ConnectionPool) Get(id string) (*Employee, error) {
-	rows, err := pool.DB.Query("select id, first_name, last_name, department, salary, age from employees where id=?", id)
+func (ds DataSource) Get(id string) (*Employee, error) {
+	rows, err := ds.DB.Query("select id, first_name, last_name, department, salary, age from employees where id=?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -166,8 +156,8 @@ func (pool ConnectionPool) Get(id string) (*Employee, error) {
 	return &t, nil
 }
 
-func (pool ConnectionPool) Clear() error {
-	stmt, err := pool.DB.Prepare("DELETE FROM employees")
+func (ds DataSource) Clear() error {
+	stmt, err := ds.DB.Prepare("DELETE FROM employees")
 	if err != nil {
 		return err
 	}
@@ -178,8 +168,8 @@ func (pool ConnectionPool) Clear() error {
 	return nil
 }
 
-func (pool ConnectionPool) List() ([]Employee, error) {
-	rows, err := pool.DB.Query("select id, first_name, last_name, department, salary, age from employees")
+func (ds DataSource) List() ([]Employee, error) {
+	rows, err := ds.DB.Query("select id, first_name, last_name, department, salary, age from employees")
 	if err != nil {
 		return nil, err
 	}
