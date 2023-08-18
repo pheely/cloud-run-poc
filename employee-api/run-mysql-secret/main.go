@@ -25,30 +25,30 @@ type ConnectionParams struct {
 	DBPwd                  string
 	DBName                 string
 	PrivateIP              string
+	InstanceConnectionName string
 }
 
 var params ConnectionParams
 var port string
 
 func init() {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASS")
-	dbName := os.Getenv("DB_NAME")
+	mustGetenv := func(key string) string {
+		value := os.Getenv(key)
+		if value == "" {
+			log.Fatal().Msg("Fatal error: environment variable not set: " + key)
+		}
+		return value
+	}
+
+	dbUser := mustGetenv("DB_USER")
+	dbPassword := mustGetenv("DB_PASS")
+	dbName := mustGetenv("DB_NAME")
 	privateIp := os.Getenv("DB_PRIVATE_IP")
+	instanceConnectionName := mustGetenv("INSTANCE_CONNECTION_NAME")
 	port = os.Getenv("PORT")
 
 	if port == "" {
 		port = "8080"
-	}
-
-	if dbUser == "" {
-		log.Fatal().Msg("Please set DB_USER.")
-	}
-	if dbPassword == "" {
-		log.Fatal().Msg("Please set DB_PASS")
-	}
-	if dbName == "" {
-		log.Fatal().Msg("Please set DB_NAME")
 	}
 	
 	params = ConnectionParams {
@@ -56,6 +56,7 @@ func init() {
 		DBPwd: dbPassword,
 		DBName: dbName,
 		PrivateIP: privateIp,
+		InstanceConnectionName: instanceConnectionName,
 	}
 }
 

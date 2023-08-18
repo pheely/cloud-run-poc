@@ -93,9 +93,13 @@ gcloud builds submit --tag $REPOSITORY/employee
 
 1. Deploy
 	```bash
-	gcloud run deploy employee-api --image $REPOSITORY/employee \
+	gcloud run services update employee-api --image $REPOSITORY/employee \
 	--add-cloudsql-instances ibcwe-event-layer-f3ccf6d9:us-central1:sql-db \
-	--set-env-vars DB="mysql://root@unix(/cloudsql/ibcwe-event-layer-f3ccf6d9:us-central1:sql-db)/hr"
+	--set-env-vars DB_USER=root \
+	--set-env-vars DB_PASS=changeit \
+	--set-env-vars DB_NAME=hr \
+	--set-env-vars DB_PRIVATE_IP= \
+	--set-env-vars INSTANCE_CONNECTION_NAME=ibcwe-event-layer-f3ccf6d9:us-central1:sql-db
 	```
 2. Check the service is deployed successfully
 	```bash
@@ -157,14 +161,61 @@ $ gcloud run services list
 
 ### Hit the endpoint
 
-```bash
+1. Display API version information
+	```bash
+	EMPLOYEE_API=$(gcloud run services describe employee-api \
+	--format "value(status.url)")
 
-EMPLOYEE_API=$(gcloud run services describe employee-api \
---format "value(status.url)")
-
-curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-$EMPLOYEE_API/api/help
-```
+	curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+	$EMPLOYEE_API/api/help
+	```
+	Output:
+	```text
+	Employee API v4
+	```
+2. List all employees
+	```bash
+	curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+	$EMPLOYEE_API/api/employee | jq
+	```
+	Output:
+	```yaml
+	[
+		{
+			"id": "1",
+			"first_name": "John",
+			"last_name": "Doe",
+			"department": "Products",
+			"salary": 200000,
+			"age": 25
+		},
+		{
+			"id": "2",
+			"first_name": "Jane",
+			"last_name": "Doe",
+			"department": "Sales",
+			"salary": 100000,
+			"age": 22
+		}
+	]
+	```
+3. Create a new employee
+	```bash
+	curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+	-d '{"first_name":"Shrek","last_name":"Unknown","department":"Royal","salary":200000,"age":25}' \
+	-X POST $EMPLOYEE_API/api/employee | jq
+	```
+	Output:
+	```yaml
+	{
+		"id": "3",
+		"first_name": "Shrek",
+		"last_name": "Unknown",
+		"department": "Royal",
+		"salary": 200000,
+		"age": 25
+	}
+	```
 
 ## Cleanup
 
